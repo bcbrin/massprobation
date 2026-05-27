@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MyProbation — Massachusetts Trial Court</title>
+<style>
+  :root {
+    --mass-navy: #14558f;
+    --mass-navy-dark: #0c3c66;
+    --mass-gold: #fcb61a;
+    --mass-bg: #f6f7f9;
+    --mass-card: #ffffff;
+    --mass-border: #d2d6db;
+    --mass-text: #141414;
+    --mass-muted: #5b6470;
+    --mass-success: #008272;
+    --mass-warning: #c04601;
+    --mass-danger: #b32424;
+    --mass-info: #0078a8;
+    --radius: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--mass-bg);
+    color: var(--mass-text);
+    line-height: 1.5;
+  }
+  a { color: var(--mass-navy); }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* Top Utility Bar */
+  .utility-bar {
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 24px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .utility-bar a { color: #fff; text-decoration: none; margin-left: 16px; }
+  .utility-bar a:hover { text-decoration: underline; }
+
+  /* Header */
+  header.main-header {
+    background: var(--mass-navy);
+    color: #fff;
+    padding: 16px 24px;
+    border-bottom: 4px solid var(--mass-gold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .seal {
+    width: 56px; height: 56px;
+    display: block;
+    background: #fff;
+    border-radius: 50%;
+    padding: 2px;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(255,255,255,0.4);
+  }
+  .seal img { width: 100%; height: 100%; display: block; border-radius: 50%; }
+  .brand-text h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  .brand-text p { margin: 0; font-size: 13px; opacity: 0.85; }
+  .user-chip {
+    background: rgba(255,255,255,0.12);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--mass-gold); color: var(--mass-navy);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px;
+  }
+
+  /* Nav */
+  nav.main-nav {
+    background: #fff;
+    border-bottom: 1px solid var(--mass-border);
+    padding: 0 24px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  nav.main-nav button {
+    background: none;
+    border: none;
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mass-text);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  nav.main-nav button:hover { background: var(--mass-bg); color: var(--mass-navy); }
+  nav.main-nav button.active {
+    color: var(--mass-navy);
+    border-bottom-color: var(--mass-navy);
+    font-weight: 600;
+  }
+
+  /* Layout */
+  main { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Page Header */
+  .page-title { margin: 0 0 6px 0; font-size: 28px; font-weight: 700; color: var(--mass-navy-dark); }
+  .page-subtitle { color: var(--mass-muted); margin: 0 0 24px 0; font-size: 15px; }
+
+  /* Cards */
+  .card {
+    background: var(--mass-card);
+    border: 1px solid var(--mass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card h3 { margin: 0 0 14px 0; font-size: 16px; color: var(--mass-navy-dark); display: flex; align-items: center; gap: 8px; }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  /* KPI cards */
+  .kpi { text-align: left; }
+  .kpi .value { font-size: 32px; font-weight: 700; color: var(--mass-navy-dark); margin: 4px 0; }
+  .kpi .label { font-size: 13px; color: var(--mass-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi .detail { font-size: 13px; color: var(--mass-muted); margin-top: 6px; }
+  .kpi.warn .value { color: var(--mass-warning); }
+  .kpi.success .value { color: var(--mass-success); }
+
+  /* Status pill */
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pill.success { background: #e0f4ef; color: var(--mass-success); }
+  .pill.warning { background: #fcefe0; color: var(--mass-warning); }
+  .pill.info { background: #e0f0f8; color: var(--mass-info); }
+  .pill.danger { background: #f8e0e0; color: var(--mass-danger); }
+  .pill.neutral { background: #eaecef; color: var(--mass-muted); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--mass-navy);
+    background: var(--mass-navy);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--mass-navy-dark); }
+  .btn.secondary { background: #fff; color: var(--mass-navy); }
+  .btn.secondary:hover { background: var(--mass-bg); }
+  .btn.danger { background: var(--mass-danger); border-color: var(--mass-danger); }
+  .btn.small { padding: 6px 12px; font-size: 13px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--mass-bg);
+    color: var(--mass-muted);
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--mass-border);
+  }
+  tbody td { padding: 12px; border-bottom: 1px solid var(--mass-border); font-size: 14px; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* Action list */
+  .action-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border: 1px solid var(--mass-border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  .action-list { list-style: none; padding: 0; margin: 0; }
+  .action-list .left { display: flex; align-items: center; gap: 12px; }
+  .icon-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #e0f0f8;
+    color: var(--mass-info);
+    font-weight: 700;
+  }
+  .icon-circle.warn { background: #fcefe0; color: var(--mass-warning); }
+  .icon-circle.success { background: #e0f4ef; color: var(--mass-success); }
+
+  /* Form */
+  .form-row { margin-bottom: 16px; }
+  .form-row label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+  .form-row input[type=text], .form-row input[type=email], .form-row input[type=tel],
+  .form-row input[type=password], .form-row select, .form-row textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--mass-border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    background: #fff;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    outline: none;
+    border-color: var(--mass-navy);
+    box-shadow: 0 0 0 3px rgba(20,85,143,0.15);
+  }
+  .form-row textarea { min-height: 100px; resize: vertical; }
+  .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+  .checkbox-row input { margin-top: 3px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+
+  /* Sign-in card */
+  .signin-wrap {
+    max-width: 460px;
+    margin: 60px auto;
+  }
+  .signin-wrap .card { padding: 36px; }
+  .signin-wrap h2 { color: var(--mass-navy-dark); margin: 0 0 6px 0; }
+  .signin-wrap .lead { color: var(--mass-muted); margin: 0 0 24px 0; }
+  .divider { text-align: center; color: var(--mass-muted); font-size: 13px; margin: 16px 0; }
+
+  /* Calendar */
+  .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .calendar .day-name { font-weight: 600; text-align: center; padding: 6px; font-size: 12px; color: var(--mass-muted); }
+  .calendar .day {
+    aspect-ratio: 1;
+    border: 1px solid var(--mass-border);
+    border-radius: 4px;
+    padding: 6px;
+    font-size: 13px;
+    background: #fff;
+    position: relative;
+  }
+  .calendar .day.muted { color: var(--mass-muted); background: #fafbfc; }
+  .calendar .day.has-event { background: #fff8e6; border-color: var(--mass-gold); font-weight: 600; }
+  .calendar .day.has-event::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--mass-warning);
+  }
+  .calendar .day.today { border: 2px solid var(--mass-navy); font-weight: 700; }
+
+  /* File upload */
+  .upload-zone {
+    border: 2px dashed var(--mass-border);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    background: #fafbfc;
+    cursor: pointer;
+  }
+  .upload-zone:hover { border-color: var(--mass-navy); background: #f0f4f9; }
+
+  /* Messages */
+  .message {
+    padding: 14px;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    border-left: 4px solid var(--mass-info);
+    background: #f0f7fb;
+  }
+  .message.from-me { border-left-color: var(--mass-navy); background: #f0f4f9; }
+  .message .meta { font-size: 12px; color: var(--mass-muted); margin-bottom: 4px; }
+
+  /* Banner */
+  .banner {
+    background: var(--mass-navy);
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .banner.warn { background: var(--mass-warning); }
+  .banner.success { background: var(--mass-success); }
+
+  /* Resources */
+  .resource-card {
+    border: 1px solid var(--mass-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    background: #fff;
+    height: 100%;
+  }
+  .resource-card h4 { margin: 0 0 8px 0; color: var(--mass-navy-dark); font-size: 15px; }
+  .resource-card p { margin: 0 0 10px 0; font-size: 13px; color: var(--mass-muted); }
+  .tag {
+    display: inline-block;
+    background: var(--mass-bg);
+    color: var(--mass-muted);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 4px;
+  }
+
+  /* Footer */
+  footer.main-footer {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 28px 24px;
+    margin-top: 48px;
+    font-size: 13px;
+  }
+  footer .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 28px; }
+  footer h5 { margin: 0 0 10px 0; font-size: 14px; }
+  footer ul { list-style: none; padding: 0; margin: 0; }
+  footer ul li { padding: 3px 0; }
+  footer a { color: #ddd; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* Skip link */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--mass-navy);
+    color: #fff;
+    padding: 8px 16px;
+    z-index: 100;
+  }
+  .skip-link:focus { top: 0; }
+
+  /* Demo notice */
+  .demo-banner {
+    background: var(--mass-gold);
+    color: #1a1a1a;
+    text-align: center;
+    padding: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="demo-banner">DEMONSTRATION MOCKUP — Not a live system. Sample data only.</div>
+
+<div class="utility-bar">
+  <span>An official website of the Commonwealth of Massachusetts</span>
+  <span>
+    <a href="#" onclick="return false;">Mass.gov</a>
+    <a href="#" onclick="return false;">Contact</a>
+    <a href="#" onclick="return false;">Help</a>
+    <a href="#" onclick="return false;">Español</a>
+  </span>
+</div>
+
+<header class="main-header">
+  <div class="brand">
+    <div class="seal"><img src="trial-court-seal.png" alt="Massachusetts Probation Service — The Trial Court seal" /></div>
+    <div class="brand-text">
+      <h1>MyProbation</h1>
+      <p>Massachusetts Trial Court — Probation Services</p>
+    </div>
+  </div>
+  <div class="user-chip" id="userChip" style="display:none;">
+    <div class="avatar">JD</div>
+    <span>John Doe</span>
+    <a href="#" style="color:#fff; margin-left:6px; font-size:12px;" onclick="signOut(); return false;">Sign out</a>
+  </div>
+</header>
+
+<nav class="main-nav" id="mainNav" style="display:none;">
+  <button data-page="dashboard" class="active">Dashboard</button>
+  <button data-page="checkin">Check-In</button>
+  <button data-page="court">Court Dates</button>
+  <button data-page="documents">Documents</button>
+  <button data-page="payments">Payments</button>
+  <button data-page="messages">Messages</button>
+  <button data-page="resources">Resources</button>
+  <button data-page="profile">My Profile</button>
+</nav>
+
+<main id="main-content">
+
+  <!-- Sign In -->
+  <section id="page-signin" class="page active">
+    <div class="signin-wrap">
+      <div class="card">
+        <h2>Sign in to MyProbation</h2>
+        <p class="lead">Securely manage your probation requirements online.</p>
+        <div class="form-row">
+          <label for="email">Email address</label>
+          <input type="email" id="email" value="john.doe@example.com" />
+        </div>
+        <div class="form-row">
+          <label for="password">Password</label>
+          <input type="password" id="password" value="••••••••" />
+        </div>
+        <button class="btn" style="width:100%; justify-content:center;" onclick="signIn()">Sign in</button>
+        <div class="divider">or</div>
+        <button class="btn secondary" style="width:100%; justify-content:center;" onclick="signIn()">Sign in with mass.gov account</button>
+        <p style="text-align:center; font-size:13px; margin-top:20px;">
+          <a href="#" onclick="return false;">Forgot password?</a> ·
+          <a href="#" onclick="return false;">Create account</a>
+        </p>
+        <p style="text-align:center; font-size:12px; color:var(--mass-muted); margin-top:24px;">
+          Need help signing in? Call <strong>1-800-555-0100</strong> Mon–Fri, 8 a.m.–5 p.m.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard -->
+  <section id="page-dashboard" class="page">
+    <h2 class="page-title">Welcome back, John</h2>
+    <p class="page-subtitle">Here's a summary of your probation status and upcoming requirements.</p>
+
+    <div class="banner warn">
+      <div><strong>Action required:</strong> Your monthly check-in is due by Friday, May 29.</div>
+      <button class="btn secondary small" onclick="goTo('checkin')">Complete check-in</button>
+    </div>
+
+    <div class="card-grid">
+      <div class="card kpi success">
+        <div class="label">Compliance Status</div>
+        <div class="value">Good Standing</div>
+        <div class="detail">Last reviewed May 12, 2026</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Time Remaining</div>
+        <div class="value">8 mo</div>
+        <div class="detail">Ends January 23, 2027</div>
+      </div>
+      <div class="card kpi warn">
+        <div class="label">Balance Due</div>
+        <div class="value">$240.00</div>
+        <div class="detail">Next payment due Jun 15</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Next Court Date</div>
+        <div class="value">Jun 18</div>
+        <div class="detail">Suffolk Superior Court, 10:00 AM</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>To-do</h3>
+      <ul class="action-list">
+        <li>
+          <div class="left">
+            <div class="icon-circle warn">!</div>
+            <div>
+              <div><strong>Submit monthly check-in</strong></div>
+              <div style="font-size:13px; color:var(--mass-muted);">Due Friday, May 29</div>
+            </div>
+          </div>
+          <button class="btn small" onclick="goTo('checkin')">Start</button>
+        </li>
+        <li>
+          <div class="left">
+            <div class="icon-circle">📄</div>
+            <div>
+              <div><strong>Upload employment verification</strong></div>
+              <div style="font-size:13px; color:var(--mass-muted);">Requested by P.O. Smith on May 20</div>
+            </div>
+          </div>
+          <button class="btn small secondary" onclick="goTo('documents')">Upload</button>
+        </li>
+        <li>
+          <div class="left">
+            <div class="icon-circle success">$</div>
+            <div>
+              <div><strong>Make payment ($60 monthly fee)</strong></div>
+              <div style="font-size:13px; color:var(--mass-muted);">Due Monday, June 15</div>
+            </div>
+          </div>
+          <button class="btn small secondary" onclick="goTo('payments')">Pay</button>
+        </li>
+        <li>
+          <div class="left">
+            <div class="icon-circle">✓</div>
+            <div>
+              <div><strong>Complete community service hours (12 of 40)</strong></div>
+              <div style="font-size:13px; color:var(--mass-muted);">28 hours remaining by Sep 30</div>
+            </div>
+          </div>
+          <button class="btn small secondary" onclick="goTo('resources')">Log hours</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Your Probation Officer</h3>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div class="avatar" style="width:48px; height:48px; font-size:16px;">RS</div>
+          <div>
+            <div><strong>Officer Rebecca Smith</strong></div>
+            <div style="font-size:13px; color:var(--mass-muted);">Suffolk Probation Department</div>
+            <div style="font-size:13px; color:var(--mass-muted);">617-555-0173 · rebecca.smith@jud.state.ma.us</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn small" onclick="goTo('messages')">Send message</button>
+          <button class="btn small secondary" onclick="goTo('messages')">Request appointment</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Conditions of probation</h3>
+        <ul style="margin:0; padding-left:18px; font-size:14px;">
+          <li>Monthly in-person or virtual check-in</li>
+          <li>Random drug testing (next: TBD)</li>
+          <li>40 hours of community service by Sep 30, 2026</li>
+          <li>Maintain employment, no contact with named parties</li>
+          <li>No travel outside Massachusetts without approval</li>
+        </ul>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:8px;">View full conditions document →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Check-In -->
+  <section id="page-checkin" class="page">
+    <h2 class="page-title">Monthly Check-In</h2>
+    <p class="page-subtitle">Provide an update on your status. This will be reviewed by your probation officer.</p>
+
+    <div class="card">
+      <h3>May 2026 check-in</h3>
+      <p style="font-size:13px; color:var(--mass-muted);">All fields are required unless marked optional.</p>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label for="address">Current address</label>
+          <input type="text" id="address" value="124 Maple St, Cambridge, MA 02139" />
+        </div>
+        <div class="form-row">
+          <label for="phone">Best phone number</label>
+          <input type="tel" id="phone" value="(617) 555-0142" />
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label for="employer">Current employer</label>
+          <input type="text" id="employer" value="Cambridge Public Works" />
+        </div>
+        <div class="form-row">
+          <label for="hours">Hours worked this month</label>
+          <input type="text" id="hours" value="160" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="changes">Any changes since last check-in?</label>
+        <textarea id="changes" placeholder="Address, phone, employment, contact with law enforcement, travel, etc.">No changes to address or employment. Completed 4 additional community service hours at Cambridge Food Bank.</textarea>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="attest1" checked />
+        <label for="attest1" style="font-weight:normal; font-size:14px;">I have not had any contact with law enforcement since my last check-in.</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="attest2" checked />
+        <label for="attest2" style="font-weight:normal; font-size:14px;">I have not traveled outside of Massachusetts.</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="attest3" checked />
+        <label for="attest3" style="font-weight:normal; font-size:14px;">I attest that the above information is true to the best of my knowledge.</label>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="btn" onclick="submitCheckin()">Submit check-in</button>
+        <button class="btn secondary" onclick="alert('Saved as draft.');">Save draft</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Past check-ins</h3>
+      <table>
+        <thead>
+          <tr><th>Period</th><th>Submitted</th><th>Reviewed by</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>April 2026</td><td>Apr 27, 2026</td><td>Officer Smith</td><td><span class="pill success">Accepted</span></td></tr>
+          <tr><td>March 2026</td><td>Mar 28, 2026</td><td>Officer Smith</td><td><span class="pill success">Accepted</span></td></tr>
+          <tr><td>February 2026</td><td>Feb 24, 2026</td><td>Officer Smith</td><td><span class="pill success">Accepted</span></td></tr>
+          <tr><td>January 2026</td><td>Jan 29, 2026</td><td>Officer Smith</td><td><span class="pill warning">Follow-up requested</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Court Dates -->
+  <section id="page-court" class="page">
+    <h2 class="page-title">Court Dates</h2>
+    <p class="page-subtitle">Your upcoming appearances. Add to your personal calendar to get reminders.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>June 2026</h3>
+        <div class="calendar" id="calendar"></div>
+      </div>
+      <div class="card">
+        <h3>Upcoming appearances</h3>
+        <div style="border-left: 4px solid var(--mass-navy); padding: 8px 14px; margin-bottom: 12px;">
+          <div style="font-size:13px; color:var(--mass-muted);">JUN 18, 2026 · 10:00 AM</div>
+          <div style="font-weight:600;">Probation Review Hearing</div>
+          <div style="font-size:13px;">Suffolk Superior Court, Room 815</div>
+          <div style="font-size:13px;">Judge Patricia Lin</div>
+          <div style="margin-top:10px;">
+            <button class="btn small">Add to calendar</button>
+            <button class="btn small secondary">Get directions</button>
+          </div>
+        </div>
+        <div style="border-left: 4px solid var(--mass-info); padding: 8px 14px;">
+          <div style="font-size:13px; color:var(--mass-muted);">SEP 30, 2026 · 9:30 AM</div>
+          <div style="font-weight:600;">Status Conference</div>
+          <div style="font-size:13px;">Suffolk Superior Court, Room 815</div>
+          <div style="font-size:13px;">Judge Patricia Lin</div>
+          <div style="margin-top:10px;">
+            <button class="btn small">Add to calendar</button>
+            <button class="btn small secondary">Get directions</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>What to bring</h3>
+      <ul style="font-size:14px;">
+        <li>Government-issued photo ID</li>
+        <li>Copy of your most recent check-in summary</li>
+        <li>Proof of employment (paystubs from last 60 days)</li>
+        <li>Community service log signed by supervisor</li>
+      </ul>
+      <p style="font-size:13px; color:var(--mass-muted);">Arrive 30 minutes early to clear security. No phones, cameras, or recording devices allowed in the courtroom.</p>
+    </div>
+  </section>
+
+  <!-- Documents -->
+  <section id="page-documents" class="page">
+    <h2 class="page-title">Documents</h2>
+    <p class="page-subtitle">Upload required documentation and view court paperwork.</p>
+
+    <div class="card">
+      <h3>Upload a document</h3>
+      <div class="upload-zone" onclick="alert('In production: opens secure file picker. Files virus-scanned, encrypted at rest.');">
+        <div style="font-size:36px;">⬆️</div>
+        <div style="font-weight:600; margin-top:8px;">Drag and drop or click to upload</div>
+        <div style="font-size:13px; color:var(--mass-muted); margin-top:4px;">PDF, JPG, or PNG up to 10 MB</div>
+      </div>
+      <div class="form-row" style="margin-top:14px;">
+        <label for="doctype">Document type</label>
+        <select id="doctype">
+          <option>Employment verification</option>
+          <option>Paystub</option>
+          <option>Community service log</option>
+          <option>Treatment program receipt</option>
+          <option>Letter from employer</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Your documents</h3>
+      <table>
+        <thead>
+          <tr><th>File</th><th>Type</th><th>Uploaded</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>📄 paystub_april_2026.pdf</td>
+            <td>Paystub</td>
+            <td>May 5, 2026</td>
+            <td><span class="pill success">Accepted</span></td>
+            <td><a href="#" onclick="return false;">View</a></td>
+          </tr>
+          <tr>
+            <td>📄 cs_log_april.pdf</td>
+            <td>Community service log</td>
+            <td>Apr 30, 2026</td>
+            <td><span class="pill success">Accepted</span></td>
+            <td><a href="#" onclick="return false;">View</a></td>
+          </tr>
+          <tr>
+            <td>📄 employer_letter.pdf</td>
+            <td>Letter from employer</td>
+            <td>Mar 12, 2026</td>
+            <td><span class="pill info">Under review</span></td>
+            <td><a href="#" onclick="return false;">View</a></td>
+          </tr>
+          <tr>
+            <td>📄 program_receipt_q1.pdf</td>
+            <td>Treatment receipt</td>
+            <td>Feb 8, 2026</td>
+            <td><span class="pill warning">More info needed</span></td>
+            <td><a href="#" onclick="return false;">View</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Court paperwork (read-only)</h3>
+      <table>
+        <thead><tr><th>Document</th><th>Date filed</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Conditions of probation order</td><td>Jan 23, 2026</td><td><a href="#" onclick="return false;">View / Download</a></td></tr>
+          <tr><td>Disposition agreement</td><td>Jan 23, 2026</td><td><a href="#" onclick="return false;">View / Download</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Payments -->
+  <section id="page-payments" class="page">
+    <h2 class="page-title">Payments</h2>
+    <p class="page-subtitle">Pay probation fees, restitution, and court costs.</p>
+
+    <div class="card-grid">
+      <div class="card kpi warn">
+        <div class="label">Balance due</div>
+        <div class="value">$240.00</div>
+        <div class="detail">Includes monthly probation fee</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Paid year-to-date</div>
+        <div class="value">$300.00</div>
+        <div class="detail">5 payments</div>
+      </div>
+      <div class="card kpi success">
+        <div class="label">Restitution status</div>
+        <div class="value">Paid in full</div>
+        <div class="detail">Completed Apr 2026</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Make a payment</h3>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label for="amount">Amount</label>
+          <input type="text" id="amount" value="$60.00" />
+        </div>
+        <div class="form-row">
+          <label for="paytype">Apply to</label>
+          <select id="paytype">
+            <option>Monthly probation fee (June 2026)</option>
+            <option>Past balance</option>
+            <option>Court costs</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="method">Payment method</label>
+        <select id="method">
+          <option>Credit/debit card</option>
+          <option>Bank transfer (ACH)</option>
+          <option>Apple Pay / Google Pay</option>
+        </select>
+      </div>
+      <button class="btn" onclick="alert('Payment portal launches secure session (PCI scope handled by payment processor — not by Power Pages).');">Continue to payment</button>
+      <p style="font-size:12px; color:var(--mass-muted); margin-top:12px;">Payments are processed by a third-party PCI-compliant gateway. We do not store card information.</p>
+    </div>
+
+    <div class="card">
+      <h3>Payment history</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Description</th><th>Method</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>May 14, 2026</td><td>Monthly fee — May</td><td>Card ****4521</td><td>$60.00</td><td><span class="pill success">Paid</span></td></tr>
+          <tr><td>Apr 15, 2026</td><td>Monthly fee — April</td><td>Card ****4521</td><td>$60.00</td><td><span class="pill success">Paid</span></td></tr>
+          <tr><td>Apr 02, 2026</td><td>Restitution — final</td><td>ACH</td><td>$1,200.00</td><td><span class="pill success">Paid</span></td></tr>
+          <tr><td>Mar 15, 2026</td><td>Monthly fee — March</td><td>Card ****4521</td><td>$60.00</td><td><span class="pill success">Paid</span></td></tr>
+          <tr><td>Feb 17, 2026</td><td>Monthly fee — February</td><td>Card ****4521</td><td>$60.00</td><td><span class="pill success">Paid</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Messages -->
+  <section id="page-messages" class="page">
+    <h2 class="page-title">Messages</h2>
+    <p class="page-subtitle">Secure communication with your probation officer.</p>
+
+    <div class="card">
+      <h3>Conversation with Officer Smith</h3>
+      <div class="message">
+        <div class="meta">Officer Smith · May 20, 2026 at 9:14 AM</div>
+        Please upload an updated employment verification by Friday. Let me know if you need a template.
+      </div>
+      <div class="message from-me">
+        <div class="meta">You · May 20, 2026 at 11:32 AM</div>
+        Will do — I'll have HR send it over this week. Thanks for the heads up.
+      </div>
+      <div class="message">
+        <div class="meta">Officer Smith · May 12, 2026 at 2:08 PM</div>
+        Your check-in for April was accepted. Nice work on the community service hours — keep it up.
+      </div>
+      <div class="message from-me">
+        <div class="meta">You · May 4, 2026 at 7:45 PM</div>
+        Submitted my April check-in. Let me know if anything else is needed.
+      </div>
+
+      <div class="form-row" style="margin-top:20px;">
+        <label for="reply">Reply</label>
+        <textarea id="reply" placeholder="Type your message…"></textarea>
+      </div>
+      <button class="btn" onclick="alert('Message sent securely to Officer Smith.');">Send message</button>
+    </div>
+
+    <div class="card">
+      <h3>Notifications</h3>
+      <p style="font-size:13px; color:var(--mass-muted);">Choose how you want to be reminded.</p>
+      <div class="checkbox-row"><input type="checkbox" id="n1" checked /><label for="n1" style="font-weight:normal; font-size:14px;">Text me 3 days before court dates</label></div>
+      <div class="checkbox-row"><input type="checkbox" id="n2" checked /><label for="n2" style="font-weight:normal; font-size:14px;">Email me when my officer sends a message</label></div>
+      <div class="checkbox-row"><input type="checkbox" id="n3" /><label for="n3" style="font-weight:normal; font-size:14px;">Text me when a payment is due</label></div>
+    </div>
+  </section>
+
+  <!-- Resources -->
+  <section id="page-resources" class="page">
+    <h2 class="page-title">Resources & Support</h2>
+    <p class="page-subtitle">Connect with services to help you succeed on probation and beyond.</p>
+
+    <div class="card-grid">
+      <div class="resource-card">
+        <h4>Substance Use Treatment</h4>
+        <p>Outpatient and intensive programs accepted by the court for compliance.</p>
+        <div><span class="tag">Treatment</span><span class="tag">Court-approved</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Find providers near you →</a>
+      </div>
+      <div class="resource-card">
+        <h4>Mental Health Counseling</h4>
+        <p>Sliding-scale and free counseling services across Massachusetts.</p>
+        <div><span class="tag">Behavioral health</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Find a counselor →</a>
+      </div>
+      <div class="resource-card">
+        <h4>Employment Services</h4>
+        <p>MassHire career centers offer free job placement and training.</p>
+        <div><span class="tag">Employment</span><span class="tag">Free</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Find a career center →</a>
+      </div>
+      <div class="resource-card">
+        <h4>Housing Assistance</h4>
+        <p>Emergency shelter, transitional housing, and rental assistance.</p>
+        <div><span class="tag">Housing</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Get help with housing →</a>
+      </div>
+      <div class="resource-card">
+        <h4>Transportation</h4>
+        <p>MBTA reduced-fare CharlieCard, RIDE program, and ride-share vouchers.</p>
+        <div><span class="tag">Transit</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Apply for assistance →</a>
+      </div>
+      <div class="resource-card">
+        <h4>Legal Aid</h4>
+        <p>Free civil legal help for housing, family, and immigration matters.</p>
+        <div><span class="tag">Legal</span><span class="tag">Free</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Get free legal help →</a>
+      </div>
+      <div class="resource-card">
+        <h4>Veterans Services</h4>
+        <p>Specialized support for veterans navigating the justice system.</p>
+        <div><span class="tag">Veterans</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Connect with veteran services →</a>
+      </div>
+      <div class="resource-card">
+        <h4>Community Service Sites</h4>
+        <p>Approved locations to complete your court-ordered service hours.</p>
+        <div><span class="tag">Community Service</span></div>
+        <a href="#" onclick="return false;" style="font-size:13px; display:inline-block; margin-top:10px;">Find a site →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Crisis support</h3>
+      <p style="font-size:14px;">If you're in crisis or thinking about harming yourself, help is available 24/7.</p>
+      <ul style="font-size:14px;">
+        <li><strong>Massachusetts Behavioral Health Help Line:</strong> 833-773-2445</li>
+        <li><strong>988 Suicide & Crisis Lifeline:</strong> Call or text 988</li>
+        <li><strong>SAMHSA National Helpline:</strong> 1-800-662-4357</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Profile -->
+  <section id="page-profile" class="page">
+    <h2 class="page-title">My Profile</h2>
+    <p class="page-subtitle">Manage your personal information and account settings.</p>
+
+    <div class="card">
+      <h3>Personal information</h3>
+      <div class="form-grid-2">
+        <div class="form-row"><label>Full name</label><input type="text" value="John A. Doe" /></div>
+        <div class="form-row"><label>Date of birth</label><input type="text" value="04/12/1987" disabled /></div>
+        <div class="form-row"><label>Email</label><input type="email" value="john.doe@example.com" /></div>
+        <div class="form-row"><label>Phone</label><input type="tel" value="(617) 555-0142" /></div>
+        <div class="form-row" style="grid-column: 1 / -1;"><label>Address</label><input type="text" value="124 Maple St, Cambridge, MA 02139" /></div>
+      </div>
+      <button class="btn">Save changes</button>
+    </div>
+
+    <div class="card">
+      <h3>Case information (read-only)</h3>
+      <table>
+        <tbody>
+          <tr><td style="width:40%;"><strong>Docket number</strong></td><td>2526CR000123</td></tr>
+          <tr><td><strong>Court</strong></td><td>Suffolk Superior Court</td></tr>
+          <tr><td><strong>Probation type</strong></td><td>Supervised, 12 months</td></tr>
+          <tr><td><strong>Start date</strong></td><td>January 23, 2026</td></tr>
+          <tr><td><strong>End date</strong></td><td>January 23, 2027</td></tr>
+          <tr><td><strong>Assigned officer</strong></td><td>Rebecca Smith</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Security</h3>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn secondary">Change password</button>
+        <button class="btn secondary">Enable two-factor authentication</button>
+        <button class="btn secondary">Manage trusted devices</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Accessibility & Language</h3>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Display language</label>
+          <select><option>English</option><option>Español</option><option>Português</option><option>Tiếng Việt</option><option>Kreyòl Ayisyen</option><option>简体中文</option></select>
+        </div>
+        <div class="form-row">
+          <label>Text size</label>
+          <select><option>Default</option><option>Larger</option><option>Largest</option></select>
+        </div>
+      </div>
+      <div class="checkbox-row"><input type="checkbox" id="hc" /><label for="hc" style="font-weight:normal; font-size:14px;">Use high-contrast mode</label></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="main-footer">
+  <div class="footer-grid">
+    <div>
+      <h5>MyProbation</h5>
+      <ul>
+        <li><a href="#" onclick="return false;">About this site</a></li>
+        <li><a href="#" onclick="return false;">Privacy policy</a></li>
+        <li><a href="#" onclick="return false;">Accessibility statement</a></li>
+        <li><a href="#" onclick="return false;">Terms of use</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Trial Court</h5>
+      <ul>
+        <li><a href="#" onclick="return false;">Mass.gov/courts</a></li>
+        <li><a href="#" onclick="return false;">Find a courthouse</a></li>
+        <li><a href="#" onclick="return false;">Probation Service</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Help</h5>
+      <ul>
+        <li>Help line: 1-800-555-0100</li>
+        <li>Mon–Fri, 8 a.m.–5 p.m.</li>
+        <li><a href="#" onclick="return false;">FAQs</a></li>
+        <li><a href="#" onclick="return false;">Report a problem</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Language Access</h5>
+      <ul>
+        <li><a href="#" onclick="return false;">Español</a></li>
+        <li><a href="#" onclick="return false;">Português</a></li>
+        <li><a href="#" onclick="return false;">Tiếng Việt</a></li>
+        <li><a href="#" onclick="return false;">Kreyòl Ayisyen</a></li>
+        <li><a href="#" onclick="return false;">简体中文</a></li>
+      </ul>
+    </div>
+  </div>
+  <div style="max-width:1200px; margin: 24px auto 0 auto; padding-top:16px; border-top:1px solid #333; font-size:12px; opacity:0.8;">
+    © 2026 Commonwealth of Massachusetts · An official site of the Massachusetts Trial Court · Built on Microsoft Power Pages (mockup)
+  </div>
+</footer>
+
+<script>
+  // Sign-in flow
+  function signIn() {
+    document.getElementById('page-signin').classList.remove('active');
+    document.getElementById('page-dashboard').classList.add('active');
+    document.getElementById('mainNav').style.display = 'flex';
+    document.getElementById('userChip').style.display = 'flex';
+    window.scrollTo(0, 0);
+  }
+  function signOut() {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-signin').classList.add('active');
+    document.getElementById('mainNav').style.display = 'none';
+    document.getElementById('userChip').style.display = 'none';
+    window.scrollTo(0, 0);
+  }
+
+  // Nav
+  document.querySelectorAll('#mainNav button').forEach(btn => {
+    btn.addEventListener('click', () => goTo(btn.dataset.page));
+  });
+  function goTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.querySelectorAll('#mainNav button').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector('#mainNav button[data-page="' + page + '"]');
+    if (activeBtn) activeBtn.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // Calendar (June 2026: starts Monday)
+  const cal = document.getElementById('calendar');
+  if (cal) {
+    const days = ['S','M','T','W','T','F','S'];
+    days.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'day-name';
+      el.textContent = d;
+      cal.appendChild(el);
+    });
+    // June 1, 2026 is a Monday — that's column index 1
+    const blanks = 1;
+    for (let i=0; i<blanks; i++) {
+      const el = document.createElement('div');
+      el.className = 'day muted';
+      cal.appendChild(el);
+    }
+    for (let d=1; d<=30; d++) {
+      const el = document.createElement('div');
+      el.className = 'day';
+      if (d === 18) el.classList.add('has-event');
+      if (d === 15) el.classList.add('has-event');
+      if (d === 2) el.classList.add('today');
+      el.innerHTML = '<div>' + d + '</div>';
+      if (d === 18) el.title = 'Probation Review Hearing — 10:00 AM';
+      if (d === 15) el.title = 'Monthly fee due';
+      cal.appendChild(el);
+    }
+  }
+
+  function submitCheckin() {
+    alert('Check-in submitted successfully. Officer Smith will review within 2 business days.');
+    goTo('dashboard');
+  }
+</script>
+
+</body>
+</html>
